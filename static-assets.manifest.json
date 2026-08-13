@@ -1,0 +1,28 @@
+{
+  "formatVersion": 1,
+  "manifestVersion": "1.0.0",
+  "updated_at": "2026-08-12T00:00:00Z",
+  "signatureKeyId": "models-k1",
+  "signatureAlgorithm": "Ed25519",
+  "signature": "REPLACE_BY_CI_AFTER_SIGNING",
+  "models": [
+    {
+      "id": "moonshine-base-encoder",
+      "kind": "asr",
+      "filename": "encoder_model.onnx",
+      "url": "https://huggingface.co/onnx-community/moonshine-base-ONNX/resolve/main/onnx/encoder_model.onnx"
+    },
+    {
+      "id": "moonshine-base-decoder",
+      "kind": "asr",
+      "filename": "decoder_model.onnx",
+      "url": "https://huggingface.co/onnx-community/moonshine-base-ONNX/resolve/main/onnx/decoder_model.onnx"
+    },
+    {
+      "id": "minilm-l6-v2",
+      "kind": "embedding",
+      "filename": "all-MiniLM-L6-v2.onnx",
+      "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/onnx/model.onnx"
+    }
+  ]
+}
