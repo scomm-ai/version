@@ -1,16 +1,20 @@
-name: Publish static assets
+name: Publish docs
 
-# Source: static-assets.manifest.json (URLs + metadata; hashes filled by CI)
-# Output: .well-known/static-assets.json (hashed + Ed25519-signed)
+# Source lives at the repo root. After merge to main, CI hashes, signs,
+# and writes the public tree under docs/. GitHub Pages serves /docs.
 on:
   push:
     branches: [main]
     paths:
+      - 'index.json'
+      - 'CNAME'
       - 'static-assets.manifest.json'
       - 'tools/**'
       - '.github/workflows/publish-static-assets.yml'
   pull_request:
     paths:
+      - 'index.json'
+      - 'CNAME'
       - 'static-assets.manifest.json'
       - 'tools/**'
       - '.github/workflows/publish-static-assets.yml'
@@ -19,7 +23,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: publish-static-assets-${{ github.ref }}
+  group: publish-docs-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -28,12 +32,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Validate, download, and hash assets
+      - name: Validate source, and hash catalog when it changed
         run: |
           set -euo pipefail
           chmod +x tools/publish_static_assets.sh tools/sign_static_assets.sh
-          SIGN=0 ./tools/publish_static_assets.sh
+          python3 tools/validate_static_assets_manifest.py static-assets.manifest.json
+          python3 -m json.tool index.json >/dev/null
+          BASE="${{ github.event.pull_request.base.sha }}"
+          CHANGED="$(git diff --name-only "$BASE"...HEAD || true)"
+          if printf '%s\n' "$CHANGED" | grep -Eq '(^|/)(static-assets.manifest.json|tools/)'; then
+            SIGN=0 ASSEMBLE=0 HASH=1 ./tools/publish_static_assets.sh
+          else
+            echo "Catalog files unchanged; skipped download"
+          fi
 
   publish:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -43,28 +57,39 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download, hash, and sign catalog
+      - name: Download, hash, sign, and assemble docs/
         env:
           # JSON: {"keyId":"models-k1","privateKey":"-----BEGIN PRIVATE KEY-----\\n..."}
           STATIC_ASSETS_PRIVATE_KEY: ${{ secrets.STATIC_ASSETS_PRIVATE_KEY }}
         run: |
           set -euo pipefail
-          if [ -z "${STATIC_ASSETS_PRIVATE_KEY:-}" ]; then
+          chmod +x tools/publish_static_assets.sh tools/sign_static_assets.sh
+          HASH=1
+          SIGN=1
+          BEFORE="${{ github.event.before }}"
+          if [[ -f docs/.well-known/static-assets.json && -n "$BEFORE" && ! "$BEFORE" =~ ^0+$ ]]; then
+            CHANGED="$(git diff --name-only "$BEFORE" "$GITHUB_SHA" || true)"
+            if ! printf '%s\n' "$CHANGED" | grep -Eq '(^|/)(static-assets.manifest.json|tools/|\.github/workflows/publish-static-assets.yml)'; then
+              HASH=0
+              SIGN=0
+              echo "Catalog unchanged; publishing index.json/CNAME only"
+            fi
+          fi
+          if [[ "$SIGN" == "1" && -z "${STATIC_ASSETS_PRIVATE_KEY:-}" ]]; then
             echo "::error::STATIC_ASSETS_PRIVATE_KEY secret is not set on scomm-ai/version"
             exit 1
           fi
-          chmod +x tools/publish_static_assets.sh tools/sign_static_assets.sh
-          ./tools/publish_static_assets.sh
+          ASSEMBLE=1 HASH="$HASH" SIGN="$SIGN" ./tools/publish_static_assets.sh
 
-      - name: Commit signed catalog
+      - name: Commit published docs/
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .well-known/static-assets.json
+          git add docs/
           if git diff --staged --quiet; then
-            echo "Signed catalog unchanged; nothing to commit"
+            echo "Published docs/ unchanged; nothing to commit"
             exit 0
           fi
-          git commit -m "Publish signed static-assets catalog"
+          git commit -m "Publish site to docs/"
           git push

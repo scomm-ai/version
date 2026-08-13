@@ -8,7 +8,7 @@
 #   export STATIC_ASSETS_PRIVATE_KEY='{"keyId":"models-k1","privateKey":"..."}'
 #   ./tools/sign_static_assets.sh \
 #     /tmp/static-assets.filled.json \
-#     .well-known/static-assets.json
+#     docs/.well-known/static-assets.json
 #
 # Signed payload (UTF-8 bytes, no trailing newline):
 #   scomm-static-assets-v1\0<signatureKeyId>\0<manifestSha256>
