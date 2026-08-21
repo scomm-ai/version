@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "manifestVersion": "1.0.0",
-  "updated_at": "2026-08-13T07:50:46Z",
+  "updated_at": "2026-08-21T06:49:01Z",
   "models": [
     {
       "id": "moonshine-base-encoder",
@@ -20,6 +20,14 @@
       "bytes": 165786949
     },
     {
+      "id": "moonshine-base-tokenizer",
+      "kind": "asr",
+      "filename": "tokenizer.json",
+      "url": "https://huggingface.co/onnx-community/moonshine-base-ONNX/resolve/main/tokenizer.json",
+      "sha256": "7b913404bdd039af4756783218af4440bc07fb7d6d8258d677e34f95b3ec416f",
+      "bytes": 3761754
+    },
+    {
       "id": "minilm-l6-v2",
       "kind": "embedding",
       "filename": "all-MiniLM-L6-v2.onnx",
@@ -30,5 +38,5 @@
   ],
   "signatureKeyId": "models-k1",
   "signatureAlgorithm": "Ed25519",
-  "signature": "g8KB0Wej7BajYY5bihT7YSwv7eWptlNkN7l/q5W4Nt/PcCOlz3wTDlFcK85WlxTgLlYEoykihbzN4b49GkYUAA=="
+  "signature": "0yJnrZxY4WHutNqhvOgCputBTsN9vXBcBG5kdBevIvC/+ZPGo0FKxGk+OZSY8tiZBcWwc1qjIzVXmDslgcmoCQ=="
 }
