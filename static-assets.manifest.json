@@ -19,6 +19,12 @@
       "url": "https://huggingface.co/onnx-community/moonshine-base-ONNX/resolve/main/onnx/decoder_model.onnx"
     },
     {
+      "id": "moonshine-base-tokenizer",
+      "kind": "asr",
+      "filename": "tokenizer.json",
+      "url": "https://huggingface.co/onnx-community/moonshine-base-ONNX/resolve/main/tokenizer.json"
+    },
+    {
       "id": "minilm-l6-v2",
       "kind": "embedding",
       "filename": "all-MiniLM-L6-v2.onnx",
